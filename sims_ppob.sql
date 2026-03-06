@@ -1,0 +1,9 @@
+CREATE TABLE user_m(
+	user_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+	email VARCHAR(100) NOT NULL,
+	nama_depan VARCHAR(100) NOT NULL,
+	nama_belakang VARCHAR(100) NOT NULL,
+	photo text NULL,
+	password VARCHAR(255) NOT NULL,
+	token TEXT NULL
+)ENGINE=INNODB;
