@@ -26,6 +26,37 @@ func NewUserService(userRepository repository.UserRepository, DB *sql.DB, valida
 	}
 }
 
+// Login implements [UserService].
+func (service *UserServiceImpl) Login(ctx context.Context, request web.LoginRequest) web.LoginResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	user, err := service.UserRepository.Login(ctx, tx, request.Email)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	checkPassword := helper.CheckPassword(request.Password, user.Password)
+	if !checkPassword {
+		panic(exception.NewBadRequestError("Password salah"))
+	}
+
+	token, err := helper.GenerateJWT(user.User_id, user.Email)
+	if err != nil {
+		panic(err)
+	}
+
+	service.UserRepository.UpdateToken(ctx, tx, user.User_id, token)
+
+	return web.LoginResponse{
+		Token: token,
+	}
+}
+
 func (service *UserServiceImpl) Create(ctx context.Context, request web.UserCreateRequest) web.UserResponse {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
@@ -54,7 +85,7 @@ func (service *UserServiceImpl) Create(ctx context.Context, request web.UserCrea
 		Email:         request.Email,
 		Nama_depan:    request.Nama_depan,
 		Nama_belakang: request.Nama_belakang,
-		Photo:         request.Photo,
+		Photo:         helper.EmptyStringToNil(request.Photo),
 		Password:      hashedPassword,
 	}
 
@@ -111,14 +142,30 @@ func (service *UserServiceImpl) FindById(ctx context.Context, userId int) web.Us
 	return helper.ToUserResponse(user)
 }
 
-func (service *UserServiceImpl) FindAll(ctx context.Context) []web.UserResponse {
+func (service *UserServiceImpl) FindAll(ctx context.Context, page int, limit int) ([]web.UserResponse, web.Paging) {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	user := service.UserRepository.FindAll(ctx, tx)
+	offset := (page - 1) * limit
 
-	return helper.ToUserResponses(user)
+	totalData := service.UserRepository.Count(ctx, tx)
+
+	user := service.UserRepository.FindAll(ctx, tx, limit, offset)
+
+	totalPage := totalData / limit
+	if totalData%limit != 0 {
+		totalPage++
+	}
+
+	paging := web.Paging{
+		Page:      page,
+		Limit:     limit,
+		TotalPage: totalPage,
+		Total:     totalData,
+	}
+
+	return helper.ToUserResponses(user), paging
 }
 
 func (service *UserServiceImpl) Delete(ctx context.Context, userId int) {

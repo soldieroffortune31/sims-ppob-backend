@@ -5,7 +5,7 @@ type User struct {
 	Email         string
 	Nama_depan    string
 	Nama_belakang string
-	Photo         string
+	Photo         *string
 	Password      string
-	Token         string
+	Token         *string
 }

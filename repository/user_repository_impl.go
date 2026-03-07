@@ -15,6 +15,33 @@ func NewUserRepository() UserRepository {
 	return &UserRepositoryImpl{}
 }
 
+// Login implements [UserRepository].
+func (repository *UserRepositoryImpl) Login(ctx context.Context, tx *sql.Tx, email string) (domain.User, error) {
+	SQL := "SELECT user_id, email, password FROM user_m where email = ?"
+	rows, err := tx.QueryContext(ctx, SQL, email)
+	helper.PanicIfError(err)
+	defer rows.Close()
+
+	user := domain.User{}
+	if rows.Next() {
+		err := rows.Scan(&user.User_id, &user.Email, &user.Password)
+		helper.PanicIfError(err)
+		return user, nil
+	} else {
+		return user, errors.New("user is not found")
+	}
+}
+
+// UpdateToken implements [UserRepository].
+func (repository *UserRepositoryImpl) UpdateToken(ctx context.Context, tx *sql.Tx, userId int, token string) {
+	SQL := "UPDATE user_m set token = ? where user_id = ?"
+	result, err := tx.ExecContext(ctx, SQL, token, userId)
+	helper.PanicIfError(err)
+
+	_, err = result.RowsAffected()
+	helper.PanicIfError(err)
+}
+
 func (repository *UserRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, user domain.User) domain.User {
 	SQL := "insert into user_m(email, nama_depan, nama_belakang, photo, password, token) values (?, ?, ?, ?, ?, ?)"
 	result, err := tx.ExecContext(ctx, SQL, user.Email, user.Nama_depan, user.Nama_belakang, user.Photo, user.Password, user.Token)
@@ -42,7 +69,7 @@ func (repository *UserRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, us
 }
 
 func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, userId int) (domain.User, error) {
-	SQL := "select * from user_m where user_id = ?"
+	SQL := "select user_id, email, nama_depan, nama_belakang, photo from user_m where user_id = ?"
 	rows, err := tx.QueryContext(ctx, SQL, userId)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -85,9 +112,26 @@ func (repository *UserRepositoryImpl) IsEmailExistByIdAndEmail(ctx context.Conte
 	return count > 0, nil
 }
 
-func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.User {
-	SQL := "select * from user_m"
+// Count implements [UserRepository].
+func (repository *UserRepositoryImpl) Count(ctx context.Context, tx *sql.Tx) int {
+	SQL := "SELECT COUNT(*) FROM user_m"
 	rows, err := tx.QueryContext(ctx, SQL)
+	helper.PanicIfError(err)
+	defer rows.Close()
+
+	total := 0
+
+	if rows.Next() {
+		err := rows.Scan(&total)
+		helper.PanicIfError(err)
+	}
+
+	return total
+}
+
+func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx, limit int, offset int) []domain.User {
+	SQL := "SELECT user_id, email, nama_depan, nama_belakang, photo FROM user_m LIMIT ? OFFSET ?"
+	rows, err := tx.QueryContext(ctx, SQL, limit, offset)
 	helper.PanicIfError(err)
 	defer rows.Close()
 

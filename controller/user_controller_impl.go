@@ -20,6 +20,21 @@ func NewUserController(userService service.UserService) UserController {
 	}
 }
 
+// Login implements [UserController].
+func (controller *UserControllerImpl) Login(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	loginRequest := web.LoginRequest{}
+	helper.ReadFromRequestBody(request, &loginRequest)
+
+	loginReponse := controller.UserService.Login(request.Context(), loginRequest)
+	webResponse := web.WebResponse{
+		Code:    200,
+		Message: "Login success",
+		Data:    loginReponse,
+	}
+
+	helper.WriteToResponseBody(writer, webResponse)
+}
+
 func (controller *UserControllerImpl) Create(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	categoryCreateRequest := web.UserCreateRequest{}
 	helper.ReadFromRequestBody(request, &categoryCreateRequest)
@@ -73,11 +88,24 @@ func (controller *UserControllerImpl) FindById(writer http.ResponseWriter, reque
 
 // FindAll implements [UserController].
 func (controller *UserControllerImpl) FindAll(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	userResponses := controller.UserService.FindAll(request.Context())
+	page, _ := strconv.Atoi(request.URL.Query().Get("page"))
+	limit, _ := strconv.Atoi(request.URL.Query().Get("limit"))
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if limit <= 0 {
+		limit = 10
+	}
+
+	userResponses, paging := controller.UserService.FindAll(request.Context(), page, limit)
+
 	webResponse := web.WebResponse{
 		Code:    200,
 		Message: "Success get all user data",
 		Data:    userResponses,
+		Paging:  paging,
 	}
 
 	helper.WriteToResponseBody(writer, webResponse)

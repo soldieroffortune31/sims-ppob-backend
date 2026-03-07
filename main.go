@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"sims-ppob/app"
 	"sims-ppob/controller"
@@ -30,12 +31,16 @@ func main() {
 	router.GET("/api/user", userController.FindAll)
 	router.DELETE("/api/user/:userId", userController.Delete)
 
+	router.POST("/api/login", userController.Login)
+
 	router.PanicHandler = exception.ErrorHandler
 
 	server := http.Server{
 		Addr:    "localhost:3000",
 		Handler: router,
 	}
+
+	fmt.Println("Server running on http://localhost:3000")
 
 	err := server.ListenAndServe()
 	helper.PanicIfError(err)

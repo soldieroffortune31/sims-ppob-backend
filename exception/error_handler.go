@@ -31,7 +31,7 @@ func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interfa
 }
 
 func badRequestError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
-	exception, ok := err.(ConflictError)
+	exception, ok := err.(BadRequestError)
 
 	if ok {
 		writer.Header().Set("Content-type", "application/json")
