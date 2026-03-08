@@ -26,8 +26,31 @@ func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interfa
 		return
 	}
 
+	if unauthorizedError(writer, request, err) {
+		return
+	}
+
 	internalServerError(writer, request, err)
 
+}
+
+func unauthorizedError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {
+	exception, ok := err.(UnauthorizedError)
+
+	if ok {
+		writer.Header().Set("Content-type", "application/json")
+		writer.WriteHeader(http.StatusUnauthorized)
+
+		webResponse := web.WebResponse{
+			Code:    http.StatusUnauthorized,
+			Message: exception.Error,
+		}
+
+		helper.WriteToResponseBody(writer, webResponse)
+		return true
+	} else {
+		return false
+	}
 }
 
 func badRequestError(writer http.ResponseWriter, request *http.Request, err interface{}) bool {

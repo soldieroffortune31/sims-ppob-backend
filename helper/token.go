@@ -27,3 +27,14 @@ func GenerateJWT(userId int, email string) (string, error) {
 	return tokenString, nil
 
 }
+
+func ValidateToken(tokenString string) (*jwt.Token, error) {
+
+	secretKey := []byte(os.Getenv("SECRET_KEY"))
+
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+
+	return token, err
+}

@@ -100,7 +100,7 @@ func (repository *UserRepositoryImpl) IsEmailExist(ctx context.Context, tx *sql.
 
 func (repository *UserRepositoryImpl) IsEmailExistByIdAndEmail(ctx context.Context, tx *sql.Tx, userId int, email string) (bool, error) {
 	SQL := "select count(*) from user_m where user_id != ? and email = ?"
-	row := tx.QueryRowContext(ctx, SQL, email)
+	row := tx.QueryRowContext(ctx, SQL, userId, email)
 
 	var count int
 	err := row.Scan(&count)

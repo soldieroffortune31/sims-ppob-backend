@@ -7,6 +7,7 @@ import (
 	"sims-ppob/controller"
 	"sims-ppob/exception"
 	"sims-ppob/helper"
+	"sims-ppob/middleware"
 	"sims-ppob/repository"
 	"sims-ppob/service"
 
@@ -23,15 +24,19 @@ func main() {
 	userService := service.NewUserService(userRepository, db, validate)
 	userController := controller.NewUserController(userService)
 
+	authMiddleware := middleware.AuthMiddleware(userRepository, db)
+
 	router := httprouter.New()
 
+	//public
 	router.POST("/api/user", userController.Create)
-	router.PUT("/api/user/:userId", userController.Update)
-	router.GET("/api/user/:userId", userController.FindById)
-	router.GET("/api/user", userController.FindAll)
-	router.DELETE("/api/user/:userId", userController.Delete)
-
 	router.POST("/api/login", userController.Login)
+
+	//private
+	router.PUT("/api/user/:userId", authMiddleware(userController.Update))
+	router.GET("/api/user/:userId", authMiddleware(userController.FindById))
+	router.GET("/api/user", authMiddleware(userController.FindAll))
+	router.DELETE("/api/user/:userId", authMiddleware(userController.Delete))
 
 	router.PanicHandler = exception.ErrorHandler
 
