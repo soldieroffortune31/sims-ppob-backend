@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/julienschmidt/httprouter"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -40,12 +41,20 @@ func main() {
 
 	router.PanicHandler = exception.ErrorHandler
 
+	// CORS
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+	})
+
+	// server
 	server := http.Server{
-		Addr:    "localhost:3000",
-		Handler: router,
+		Addr:    "localhost:8000",
+		Handler: corsHandler.Handler(router),
 	}
 
-	fmt.Println("Server running on http://localhost:3000")
+	fmt.Println("Server running on http://localhost:8000")
 
 	err := server.ListenAndServe()
 	helper.PanicIfError(err)
