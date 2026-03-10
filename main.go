@@ -25,6 +25,10 @@ func main() {
 	userService := service.NewUserService(userRepository, db, validate)
 	userController := controller.NewUserController(userService)
 
+	fileRepository := repository.NewFileRepository()
+	fileService := service.NewFileService(fileRepository)
+	fileController := controller.NewFileController(fileService)
+
 	authMiddleware := middleware.AuthMiddleware(userRepository, db)
 
 	router := httprouter.New()
@@ -32,6 +36,8 @@ func main() {
 	//public
 	router.POST("/api/user", userController.Create)
 	router.POST("/api/login", userController.Login)
+	router.POST("/api/upload", fileController.Upload)
+	router.ServeFiles("/uploads/*filepath", http.Dir("./uploads"))
 
 	//private
 	router.PUT("/api/user/:userId", authMiddleware(userController.Update))
