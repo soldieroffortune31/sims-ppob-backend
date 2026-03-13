@@ -7,3 +7,11 @@ CREATE TABLE user_m(
 	password VARCHAR(255) NOT NULL,
 	token TEXT NULL
 )ENGINE=INNODB;
+
+CREATE TABLE userbalance_m (
+	userbalance_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+	user_id INTEGER UNIQUE,
+	balance BIGINT,
+	created_at DATETIME,
+	updated_at DATETIME
+)ENGINE=INNODB

@@ -22,7 +22,8 @@ func main() {
 	validate := validator.New()
 
 	userRepository := repository.NewUserRepository()
-	userService := service.NewUserService(userRepository, db, validate)
+	userBalanceRepository := repository.NewUserBalanceRepository()
+	userService := service.NewUserService(userRepository, userBalanceRepository, db, validate)
 	userController := controller.NewUserController(userService)
 
 	fileRepository := repository.NewFileRepository()

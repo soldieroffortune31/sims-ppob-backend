@@ -13,16 +13,18 @@ import (
 )
 
 type UserServiceImpl struct {
-	UserRepository repository.UserRepository
-	DB             *sql.DB
-	Validate       *validator.Validate
+	UserRepository        repository.UserRepository
+	UserBalanceRepository repository.UserBalanceRepository
+	DB                    *sql.DB
+	Validate              *validator.Validate
 }
 
-func NewUserService(userRepository repository.UserRepository, DB *sql.DB, validate *validator.Validate) UserService {
+func NewUserService(userRepository repository.UserRepository, userBalanceRepository repository.UserBalanceRepository, DB *sql.DB, validate *validator.Validate) UserService {
 	return &UserServiceImpl{
-		UserRepository: userRepository,
-		DB:             DB,
-		Validate:       validate,
+		UserRepository:        userRepository,
+		UserBalanceRepository: userBalanceRepository,
+		DB:                    DB,
+		Validate:              validate,
 	}
 }
 
@@ -90,6 +92,13 @@ func (service *UserServiceImpl) Create(ctx context.Context, request web.UserCrea
 	}
 
 	user = service.UserRepository.Save(ctx, tx, user)
+
+	userBalance := domain.UserBalance{
+		User_id: user.User_id,
+		Balance: 0,
+	}
+
+	service.UserBalanceRepository.Save(ctx, tx, userBalance)
 
 	return helper.ToUserResponse(user)
 }
