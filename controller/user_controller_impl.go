@@ -2,7 +2,9 @@ package controller
 
 import (
 	"net/http"
+	"sims-ppob/exception"
 	"sims-ppob/helper"
+	"sims-ppob/model/domain"
 	"sims-ppob/model/web"
 	"sims-ppob/service"
 	"strconv"
@@ -72,9 +74,16 @@ func (controller *UserControllerImpl) Update(writer http.ResponseWriter, request
 
 // FindById implements [UserController].
 func (controller *UserControllerImpl) FindById(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	user := request.Context().Value("user").(domain.User)
+	userid_token := user.User_id
+
 	userId := params.ByName("userId")
 	id, err := strconv.Atoi(userId)
 	helper.PanicIfError(err)
+
+	if userid_token != id {
+		panic(exception.NewUnauthorizedError("You have no access"))
+	}
 
 	userResponse := controller.UserService.FindById(request.Context(), id)
 	webResponse := web.WebResponse{
