@@ -8,4 +8,5 @@ type User struct {
 	Photo         *string
 	Password      string
 	Token         *string
+	UserBalance   UserBalance
 }

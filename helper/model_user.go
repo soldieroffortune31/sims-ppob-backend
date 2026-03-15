@@ -12,6 +12,9 @@ func ToUserResponse(user domain.User) web.UserResponse {
 		Nama_depan:    user.Nama_depan,
 		Nama_belakang: user.Nama_belakang,
 		Photo:         user.Photo,
+		UserBalanceResponse: web.UserBalanceInfo{
+			Balance: user.UserBalance.Balance,
+		},
 	}
 }
 

@@ -55,7 +55,8 @@ func (service *UserServiceImpl) Login(ctx context.Context, request web.LoginRequ
 	service.UserRepository.UpdateToken(ctx, tx, user.User_id, token)
 
 	return web.LoginResponse{
-		Token: token,
+		User_id: user.User_id,
+		Token:   token,
 	}
 }
 

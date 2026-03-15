@@ -69,14 +69,14 @@ func (repository *UserRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, us
 }
 
 func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, userId int) (domain.User, error) {
-	SQL := "select user_id, email, nama_depan, nama_belakang, photo from user_m where user_id = ?"
+	SQL := "select a.user_id, a.email, a.nama_depan, a.nama_belakang, a.photo, b.balance from user_m a join userbalance_m b on a.user_id = b.user_id where a.user_id = ?"
 	rows, err := tx.QueryContext(ctx, SQL, userId)
 	helper.PanicIfError(err)
 	defer rows.Close()
 
 	user := domain.User{}
 	if rows.Next() {
-		err := rows.Scan(&user.User_id, &user.Email, &user.Nama_depan, &user.Nama_belakang, &user.Photo)
+		err := rows.Scan(&user.User_id, &user.Email, &user.Nama_depan, &user.Nama_belakang, &user.Photo, &user.UserBalance.Balance)
 		helper.PanicIfError(err)
 		return user, nil
 	} else {

@@ -1,5 +1,6 @@
 package web
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	User_id int    `json:"user_id"`
+	Token   string `json:"token"`
 }
