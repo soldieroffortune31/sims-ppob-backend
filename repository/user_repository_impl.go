@@ -6,6 +6,7 @@ import (
 	"errors"
 	"sims-ppob/helper"
 	"sims-ppob/model/domain"
+	"time"
 )
 
 type UserRepositoryImpl struct {
@@ -17,7 +18,7 @@ func NewUserRepository() UserRepository {
 
 // Login implements [UserRepository].
 func (repository *UserRepositoryImpl) Login(ctx context.Context, tx *sql.Tx, email string) (domain.User, error) {
-	SQL := "SELECT user_id, email, password FROM user_m where email = ?"
+	SQL := "SELECT user_id, email, password FROM user_m where email = ? AND deleted_at IS NULL"
 	rows, err := tx.QueryContext(ctx, SQL, email)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -43,8 +44,8 @@ func (repository *UserRepositoryImpl) UpdateToken(ctx context.Context, tx *sql.T
 }
 
 func (repository *UserRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, user domain.User) domain.User {
-	SQL := "insert into user_m(email, nama_depan, nama_belakang, photo, password, token) values (?, ?, ?, ?, ?, ?)"
-	result, err := tx.ExecContext(ctx, SQL, user.Email, user.Nama_depan, user.Nama_belakang, user.Photo, user.Password, user.Token)
+	SQL := "insert into user_m(email, nama_depan, nama_belakang, photo, password, token, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)"
+	result, err := tx.ExecContext(ctx, SQL, user.Email, user.Nama_depan, user.Nama_belakang, user.Photo, user.Password, user.Token, time.Now().UTC(), time.Now().UTC())
 	helper.PanicIfError(err)
 
 	id, err := result.LastInsertId()
@@ -55,21 +56,21 @@ func (repository *UserRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, user
 }
 
 func (repository *UserRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, user domain.User) domain.User {
-	SQL := "update user_m set email = ?, nama_depan = ?, nama_belakang = ?, photo = ? where user_id = ?"
-	_, err := tx.ExecContext(ctx, SQL, user.Email, user.Nama_depan, user.Nama_belakang, user.Photo, user.User_id)
+	SQL := "update user_m set email = ?, nama_depan = ?, nama_belakang = ?, photo = ?, updated_at = ? where user_id = ?"
+	_, err := tx.ExecContext(ctx, SQL, user.Email, user.Nama_depan, user.Nama_belakang, user.Photo, time.Now().UTC(), user.User_id)
 	helper.PanicIfError(err)
 
 	return user
 }
 
 func (repository *UserRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, user domain.User) {
-	SQL := "delete from user_m where user_id = ?"
-	_, err := tx.ExecContext(ctx, SQL, user.User_id)
+	SQL := "update user_m set deleted_at = ? where user_id = ?"
+	_, err := tx.ExecContext(ctx, SQL, time.Now().UTC(), user.User_id)
 	helper.PanicIfError(err)
 }
 
 func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, userId int) (domain.User, error) {
-	SQL := "select a.user_id, a.email, a.nama_depan, a.nama_belakang, a.photo, b.balance from user_m a join userbalance_m b on a.user_id = b.user_id where a.user_id = ?"
+	SQL := "select a.user_id, a.email, a.nama_depan, a.nama_belakang, a.photo, b.balance from user_m a join userbalance_m b on a.user_id = b.user_id where a.user_id = ? AND a.deleted_at IS NULL"
 	rows, err := tx.QueryContext(ctx, SQL, userId)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -114,7 +115,7 @@ func (repository *UserRepositoryImpl) IsEmailExistByIdAndEmail(ctx context.Conte
 
 // Count implements [UserRepository].
 func (repository *UserRepositoryImpl) Count(ctx context.Context, tx *sql.Tx) int {
-	SQL := "SELECT COUNT(*) FROM user_m"
+	SQL := "SELECT COUNT(*) FROM user_m WHERE deleted_at IS NULL"
 	rows, err := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -130,7 +131,7 @@ func (repository *UserRepositoryImpl) Count(ctx context.Context, tx *sql.Tx) int
 }
 
 func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx, limit int, offset int) []domain.User {
-	SQL := "SELECT user_id, email, nama_depan, nama_belakang, photo FROM user_m LIMIT ? OFFSET ?"
+	SQL := "SELECT a.user_id, a.email, a.nama_depan, a.nama_belakang, a.photo, b.balance FROM user_m a join userbalance_m b on a.user_id = b.user_id WHERE a.deleted_at IS NULL LIMIT ? OFFSET ?"
 	rows, err := tx.QueryContext(ctx, SQL, limit, offset)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -138,7 +139,7 @@ func (repository *UserRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx, l
 	var users []domain.User
 	for rows.Next() {
 		user := domain.User{}
-		err := rows.Scan(&user.User_id, &user.Email, &user.Nama_depan, &user.Nama_belakang, &user.Photo)
+		err := rows.Scan(&user.User_id, &user.Email, &user.Nama_depan, &user.Nama_belakang, &user.Photo, &user.UserBalance.Balance)
 		helper.PanicIfError(err)
 		users = append(users, user)
 	}

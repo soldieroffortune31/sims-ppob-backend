@@ -8,4 +8,5 @@ type UserBalance struct {
 	Balance        int64
 	Created_at     time.Time
 	Update_at      time.Time
+	Deleted_at     time.Time
 }

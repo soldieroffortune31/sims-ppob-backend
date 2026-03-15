@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type User struct {
 	User_id       int
 	Email         string
@@ -9,4 +11,7 @@ type User struct {
 	Password      string
 	Token         *string
 	UserBalance   UserBalance
+	Created_at    time.Time
+	Update_at     time.Time
+	Deleted_at    *time.Time
 }

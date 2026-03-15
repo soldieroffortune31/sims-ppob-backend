@@ -40,7 +40,7 @@ func (repository *UserBalanceRepositoryImpl) Update(ctx context.Context, tx *sql
 
 // FindByUserId implements [UserBalanceRepository].
 func (repository *UserBalanceRepositoryImpl) FindByUserId(ctx context.Context, tx *sql.Tx, userId int) (domain.UserBalance, error) {
-	SQL := "select userbalance_id, user_id, balance where user_id = ?"
+	SQL := "select userbalance_id, user_id, balance where user_id = ? AND deleted_at IS NULL"
 	rows, err := tx.QueryContext(ctx, SQL, userId)
 	helper.PanicIfError(err)
 	defer rows.Close()
