@@ -35,6 +35,10 @@ CREATE TABLE jenistransaksi_m (
 	jenis_transaksi VARCHAR(100)
 )ENGINE=INNODB
 
+ALTER TABLE jenistransaksi_m ADD COLUMN created_at DATETIME
+ALTER TABLE jenistransaksi_m ADD COLUMN updated_at DATETIME
+ALTER TABLE jenistransaksi_m ADD COLUMN deleted_at DATETIME
+
 /* end jenis transaksi*/
 
 
