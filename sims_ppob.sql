@@ -28,6 +28,15 @@ ALTER TABLE userbalance_m ADD COLUMN deleted_at DATETIME;
 
 /* end userbalance_m */
 
+/* start jenis transaksi */
+
+CREATE TABLE jenistransaksi_m (
+	jenistransaksi_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+	jenis_transaksi VARCHAR(100)
+)ENGINE=INNODB
+
+/* end jenis transaksi*/
+
 
 /* start transaksi */
 CREATE TABLE transaksi_t(
@@ -38,6 +47,7 @@ CREATE TABLE transaksi_t(
 	saldo_masuk BIGINT DEFAULT 0,
 	saldo_keluar BIGINT DEFAULT 0,
 	saldo_sekarang BIGINT NOT NULL,
+	jenistransaksi_id INTEGER,
 	tgl_transaksi DATETIME,
 	created_at DATETIME,
 	update_at DATETIME,
@@ -53,6 +63,12 @@ ON UPDATE RESTRICT
 ALTER TABLE transaksi_t
 ADD CONSTRAINT fk_transaksi_user
 FOREIGN KEY (user_id) REFERENCES user_m(user_id)
+ON DELETE RESTRICT
+ON UPDATE RESTRICT;
+
+ALTER TABLE transaksi_t
+ADD CONSTRAINT fk_transaksi_jenistransaksi
+FOREIGN KEY (jenistransaksi_id) REFERENCES jenistransaksi_m(jenistransaksi_id)
 ON DELETE RESTRICT
 ON UPDATE RESTRICT;
 
