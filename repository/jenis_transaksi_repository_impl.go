@@ -39,7 +39,7 @@ func (repository *JenisTransaksiRepositoryImpl) Update(ctx context.Context, tx *
 
 // FindById implements [JenisTransaksiRepository].
 func (repository *JenisTransaksiRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, jenistransaksiId int) (domain.JenisTransaksi, error) {
-	SQL := "SELECT jenistransaksi_id, jenis_transaksi FROM jenistransaksi_m WHERE jenistranskasi_id = ? AND deleted_at IS NULL"
+	SQL := "SELECT jenistransaksi_id, jenis_transaksi FROM jenistransaksi_m WHERE jenistransaksi_id = ? AND deleted_at IS NULL"
 	rows, err := tx.QueryContext(ctx, SQL, jenistransaksiId)
 	helper.PanicIfError(err)
 	defer rows.Close()
@@ -72,7 +72,7 @@ func (repository *JenisTransaksiRepositoryImpl) Count(ctx context.Context, tx *s
 
 // FindAll implements [JenisTransaksiRepository].
 func (repository *JenisTransaksiRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx, limit int, offset int) []domain.JenisTransaksi {
-	SQL := "SELECT jenistransaksi_id, jenis_transaksi FROM jenistransaksi_m WHERE deleted_at IS NULL LIMIT ? OFFSET 0"
+	SQL := "SELECT jenistransaksi_id, jenis_transaksi FROM jenistransaksi_m WHERE deleted_at IS NULL LIMIT ? OFFSET ?"
 	rows, err := tx.QueryContext(ctx, SQL, limit, offset)
 	helper.PanicIfError(err)
 	defer rows.Close()
