@@ -90,7 +90,7 @@ func (repository *JenisTransaksiRepositoryImpl) FindAll(ctx context.Context, tx 
 
 // Delete implements [JenisTransaksiRepository].
 func (repository *JenisTransaksiRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, jenistransaksiId int) {
-	SQL := "UPDATE FROM jenistransaksi_m SET deleted_at = ?"
-	_, err := tx.ExecContext(ctx, SQL, helper.GetTimeUTCNow())
+	SQL := "UPDATE FROM jenistransaksi_m SET deleted_at = ? WHERE jenistransaksi_id = ?"
+	_, err := tx.ExecContext(ctx, SQL, helper.GetTimeUTCNow(), jenistransaksiId)
 	helper.PanicIfError(err)
 }
