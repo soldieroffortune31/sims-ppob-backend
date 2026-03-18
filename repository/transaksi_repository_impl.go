@@ -17,7 +17,7 @@ func NewTransaksiRepository() TransaksiRepository {
 // Save implements [TransaksiRepository].
 func (t *TransaksiRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, transaksi domain.Transaksi) domain.Transaksi {
 	SQL := "INSERT INTO transaksi_t (userbalance_id, user_id, saldo_terakhir, saldo_masuk, saldo_keluar, saldo_sekarang, jenistransaksi_id, tgl_transaksi, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	result, err := tx.ExecContext(ctx, SQL, transaksi.Userbalance_id, transaksi.User_id, transaksi.Saldo_terakhir, transaksi.Saldo_masuk, transaksi.Saldo_keluar, transaksi.Saldo_sekarang, transaksi.Jenistransaksi_id, transaksi.Tgl_transaksi, helper.GetTimeUTCNow())
+	result, err := tx.ExecContext(ctx, SQL, transaksi.Userbalance_id, transaksi.User_id, transaksi.Saldo_terakhir, transaksi.Saldo_masuk, transaksi.Saldo_keluar, transaksi.Saldo_sekarang, transaksi.Jenistransaksi_id, transaksi.Tgl_transaksi, helper.GetTimeUTCNow(), helper.GetTimeUTCNow())
 	helper.PanicIfError(err)
 
 	id, err := result.LastInsertId()
