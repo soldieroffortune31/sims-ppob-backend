@@ -13,20 +13,22 @@ import (
 )
 
 type TransaksiServiceImpl struct {
-	TransaksiRepository   repository.TransaksiRepository
-	UserRepository        repository.UserRepository
-	UserBalanceRepository repository.UserBalanceRepository
-	DB                    *sql.DB
-	Validate              *validator.Validate
+	TransaksiRepository      repository.TransaksiRepository
+	UserRepository           repository.UserRepository
+	UserBalanceRepository    repository.UserBalanceRepository
+	JenisTransaksiRepository repository.JenisTransaksiRepository
+	DB                       *sql.DB
+	Validate                 *validator.Validate
 }
 
-func NewTransaksiBalance(transaksiRepository repository.TransaksiRepository, userRepository repository.UserRepository, userBalanceRepository repository.UserBalanceRepository, DB *sql.DB, validate *validator.Validate) TransaksiService {
+func NewTransaksiBalance(transaksiRepository repository.TransaksiRepository, userRepository repository.UserRepository, userBalanceRepository repository.UserBalanceRepository, jenisTransaksiRepository repository.JenisTransaksiRepository, DB *sql.DB, validate *validator.Validate) TransaksiService {
 	return &TransaksiServiceImpl{
-		TransaksiRepository:   transaksiRepository,
-		UserRepository:        userRepository,
-		UserBalanceRepository: userBalanceRepository,
-		DB:                    DB,
-		Validate:              validate,
+		TransaksiRepository:      transaksiRepository,
+		UserRepository:           userRepository,
+		UserBalanceRepository:    userBalanceRepository,
+		JenisTransaksiRepository: jenisTransaksiRepository,
+		DB:                       DB,
+		Validate:                 validate,
 	}
 }
 
@@ -40,6 +42,11 @@ func (service *TransaksiServiceImpl) Save(ctx context.Context, request web.Trans
 	defer helper.CommitOrRollback(tx)
 
 	user, err := service.UserRepository.FindById(ctx, tx, request.User_id)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
+
+	jenisTransaksi, err := service.JenisTransaksiRepository.FindById(ctx, tx, request.JenisTransaksi_id)
 	if err != nil {
 		panic(exception.NewNotFoundError(err.Error()))
 	}
@@ -77,7 +84,7 @@ func (service *TransaksiServiceImpl) Save(ctx context.Context, request web.Trans
 		Saldo_masuk:       saldoMasuk,
 		Saldo_keluar:      saldoKeluar,
 		Saldo_sekarang:    saldoSekarang,
-		Jenistransaksi_id: request.JenisTransaksi_id,
+		Jenistransaksi_id: jenisTransaksi.JenisTransaksi_id,
 		Tgl_transaksi:     request.Tgl_transaksi,
 	}
 
