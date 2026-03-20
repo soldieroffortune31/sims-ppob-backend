@@ -61,6 +61,7 @@ func main() {
 	router.DELETE("/api/jenis-transaksi/:jenisTransaksiId", authMiddleware(jenisTransaksiController.Delete))
 
 	router.POST("/api/transaksi", authMiddleware(transaksiController.Create))
+	router.GET("/api/transaksi", authMiddleware(transaksiController.FindAll))
 
 	router.PanicHandler = exception.ErrorHandler
 

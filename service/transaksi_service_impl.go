@@ -93,21 +93,28 @@ func (service *TransaksiServiceImpl) Save(ctx context.Context, request web.Trans
 	userBalance.Balance = saldoSekarang
 	userBalance = service.UserBalanceRepository.Update(ctx, tx, userBalance)
 
-	return web.TransaksiResponse{
-		Transaksi_id:      transaksi.Transaksi_id,
-		Userbalance_id:    transaksi.Userbalance_id,
-		User_id:           transaksi.User_id,
-		Saldo_terakhir:    transaksi.Saldo_terakhir,
-		Saldo_masuk:       transaksi.Saldo_masuk,
-		Saldo_keluar:      transaksi.Saldo_keluar,
-		Saldo_sekarang:    transaksi.Saldo_sekarang,
-		Jenistransaksi_id: transaksi.Jenistransaksi_id,
-		Tgl_transaksi:     transaksi.Tgl_transaksi,
-	}
-
+	return helper.ToTransaksiResponse(transaksi)
 }
 
 // Find implements [TransaksiService].
-func (service *TransaksiServiceImpl) Find(ctx context.Context, request domain.TransaksiQuery) web.PagedResponse[web.TransaksiResponse] {
-	panic("unimplemented")
+func (service *TransaksiServiceImpl) Find(ctx context.Context, request web.TransaksiQueryRequest) web.PagedResponse[web.TransaksiResponse] {
+	tx, err := service.DB.Begin()
+	helper.PanicIfError(err)
+	defer helper.CommitOrRollback(tx)
+
+	data, total := service.TransaksiRepository.FindAll(ctx, tx, request)
+
+	responses := helper.ToTransaksiResponses(data)
+
+	meta := web.PageResponse{
+		Page:      request.Page,
+		Limit:     request.Limit,
+		Total:     total,
+		TotalPage: helper.GetTotalPage(total, request.Limit),
+	}
+
+	return web.PagedResponse[web.TransaksiResponse]{
+		Data: responses,
+		Meta: meta,
+	}
 }

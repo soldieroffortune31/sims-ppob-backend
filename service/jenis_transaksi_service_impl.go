@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"sims-ppob/exception"
 	"sims-ppob/helper"
 	"sims-ppob/model/domain"
@@ -31,7 +30,6 @@ func NewJenisTransaksiService(jenisTransaksiRepository repository.JenisTransaksi
 func (service *JenisTransaksiServiceImpl) Create(ctx context.Context, request web.JenisTransaksiCreateRequest) web.JenisTransaksiResponse {
 	err := service.Validate.Struct(request)
 	helper.PanicIfError(err)
-	fmt.Println("ok")
 
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)

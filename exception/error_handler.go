@@ -1,6 +1,7 @@
 package exception
 
 import (
+	"fmt"
 	"net/http"
 	"sims-ppob/helper"
 	"sims-ppob/model/web"
@@ -94,6 +95,8 @@ func conflictError(writer http.ResponseWriter, request *http.Request, err interf
 func internalServerError(writer http.ResponseWriter, request *http.Request, err interface{}) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusInternalServerError)
+
+	fmt.Println("ERROR", err)
 
 	webResponse := web.WebResponse{
 		Code:    http.StatusInternalServerError,

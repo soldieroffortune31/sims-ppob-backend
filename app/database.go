@@ -9,7 +9,7 @@ import (
 )
 
 func NewDb() *sql.DB {
-	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/sims_ppob")
+	db, err := sql.Open("mysql", "root@tcp(localhost:3306)/sims_ppob?parseTime=true")
 	helper.PanicIfError(err)
 
 	db.SetMaxIdleConns(5)
