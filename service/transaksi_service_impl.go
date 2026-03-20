@@ -21,7 +21,7 @@ type TransaksiServiceImpl struct {
 	Validate                 *validator.Validate
 }
 
-func NewTransaksiBalance(transaksiRepository repository.TransaksiRepository, userRepository repository.UserRepository, userBalanceRepository repository.UserBalanceRepository, jenisTransaksiRepository repository.JenisTransaksiRepository, DB *sql.DB, validate *validator.Validate) TransaksiService {
+func NewTransaksiService(transaksiRepository repository.TransaksiRepository, userRepository repository.UserRepository, userBalanceRepository repository.UserBalanceRepository, jenisTransaksiRepository repository.JenisTransaksiRepository, DB *sql.DB, validate *validator.Validate) TransaksiService {
 	return &TransaksiServiceImpl{
 		TransaksiRepository:      transaksiRepository,
 		UserRepository:           userRepository,
@@ -56,13 +56,13 @@ func (service *TransaksiServiceImpl) Save(ctx context.Context, request web.Trans
 		panic(exception.NewNotFoundError(err.Error()))
 	}
 
-	if request.Saldo_masuk == 0 && request.Saldo_keluar == 0 {
+	saldoSekarang := userBalance.Balance
+	saldoMasuk := *request.Saldo_masuk
+	saldoKeluar := *request.Saldo_keluar
+
+	if saldoMasuk == 0 && saldoKeluar == 0 {
 		panic(exception.NewBadRequestError("transaction must not be 0"))
 	}
-
-	saldoSekarang := userBalance.Balance
-	saldoMasuk := request.Saldo_masuk
-	saldoKeluar := request.Saldo_keluar
 
 	if saldoMasuk > 0 {
 		saldoSekarang = saldoSekarang + saldoMasuk
@@ -100,8 +100,8 @@ func (service *TransaksiServiceImpl) Save(ctx context.Context, request web.Trans
 		Saldo_terakhir:    transaksi.Saldo_terakhir,
 		Saldo_masuk:       transaksi.Saldo_masuk,
 		Saldo_keluar:      transaksi.Saldo_keluar,
-		Saldo_sekarang:    transaksi.Saldo_keluar,
-		Jenistransaksi_id: transaksi.Transaksi_id,
+		Saldo_sekarang:    transaksi.Saldo_sekarang,
+		Jenistransaksi_id: transaksi.Jenistransaksi_id,
 		Tgl_transaksi:     transaksi.Tgl_transaksi,
 	}
 

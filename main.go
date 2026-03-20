@@ -36,6 +36,10 @@ func main() {
 	jenisTransaksiService := service.NewJenisTransaksiService(jenisTransaksiRepository, db, validate)
 	jenisTransaksiController := controller.NewJenisTransaksiController(jenisTransaksiService)
 
+	transaksiRepository := repository.NewTransaksiRepository()
+	transaksiService := service.NewTransaksiService(transaksiRepository, userRepository, userBalanceRepository, jenisTransaksiRepository, db, validate)
+	transaksiController := controller.NewTransaksiController(transaksiService)
+
 	router := httprouter.New()
 
 	//public
@@ -55,6 +59,8 @@ func main() {
 	router.GET("/api/jenis-transaksi/:jenisTransaksiId", authMiddleware(jenisTransaksiController.FindById))
 	router.GET("/api/jenis-transaksi", authMiddleware(jenisTransaksiController.FindAll))
 	router.DELETE("/api/jenis-transaksi/:jenisTransaksiId", authMiddleware(jenisTransaksiController.Delete))
+
+	router.POST("/api/transaksi", authMiddleware(transaksiController.Create))
 
 	router.PanicHandler = exception.ErrorHandler
 

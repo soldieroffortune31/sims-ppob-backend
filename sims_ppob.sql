@@ -54,8 +54,8 @@ CREATE TABLE transaksi_t(
 	jenistransaksi_id INTEGER,
 	tgl_transaksi DATETIME,
 	created_at DATETIME,
-	update_at DATETIME,
-	delete_at DATETIME
+	updated_at DATETIME,
+	deleted_at DATETIME
 )ENGINE=INNODB;
 
 ALTER TABLE transaksi_t

@@ -32,7 +32,7 @@ func (repository *UserBalanceRepositoryImpl) Save(ctx context.Context, tx *sql.T
 // Update implements [UserBalanceRepository].
 func (repository *UserBalanceRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, userBalance domain.UserBalance) domain.UserBalance {
 	SQL := "UPDATE userbalance_m set balance = ?, updated_at = ? where user_id = ?"
-	_, err := tx.ExecContext(ctx, SQL, userBalance.Balance, time.Now().UTC())
+	_, err := tx.ExecContext(ctx, SQL, userBalance.Balance, time.Now().UTC(), userBalance.User_id)
 	helper.PanicIfError(err)
 
 	return userBalance
@@ -40,7 +40,7 @@ func (repository *UserBalanceRepositoryImpl) Update(ctx context.Context, tx *sql
 
 // FindByUserId implements [UserBalanceRepository].
 func (repository *UserBalanceRepositoryImpl) FindByUserId(ctx context.Context, tx *sql.Tx, userId int) (domain.UserBalance, error) {
-	SQL := "select userbalance_id, user_id, balance where user_id = ? AND deleted_at IS NULL"
+	SQL := "select userbalance_id, user_id, balance from userbalance_m where user_id = ? AND deleted_at IS NULL"
 	rows, err := tx.QueryContext(ctx, SQL, userId)
 	helper.PanicIfError(err)
 	defer rows.Close()
